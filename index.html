@@ -22,8 +22,8 @@
     <!-- REPLACE the values below with your actual Supabase project credentials -->
     <script>
       window.__ENV = {
-        SUPABASE_URL:      "https://xsqawwbnmwprfkbmugqm.supabase.co",
-        SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWF3d2JubXdwcmZrYm11Z3FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTM2MzYsImV4cCI6MjA5NDc4OTYzNn0.sGsPzhddOyt_1CgREQ4uF3LWqf27fZXCRVdKDeIuhxM"
+        SUPABASE_URL:      "REPLACE_WITH_YOUR_SUPABASE_URL",
+        SUPABASE_ANON_KEY: "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY"
       };
     </script>
   </head>
@@ -58,7 +58,10 @@
               <span>50 lei / ora</span>
             </div>
             <h1 id="portal-title">Meditatii online la matematica</h1>
-            
+            <p>
+              Un pliant online simplu pentru parinti: informatii despre ore, calendar,
+              pret si plata rapida prin transfer bancar, Revolut sau BT Pay.
+            </p>
             <div class="info-list">
               <div>
                 <strong>Online</strong>
@@ -98,15 +101,18 @@
                 />
                 <button type="submit">Vezi contul</button>
               </div>
-              
+              <p class="hint" id="phone-hint">
+                Telefonul este folosit doar pentru a gasi elevul si orele lui.
+              </p>
             </form>
 
-            
+            <div class="empty-state" id="parent-empty" aria-live="polite">
+              <strong>Informatiile elevului apar aici.</strong>
+              <span>Parintele poate vedea orele alocate si poate deschide pagina cu datele de plata.</span>
+            </div>
 
             <div class="account-view hidden" id="parent-account" aria-live="polite"></div>
-          
           </section>
-          
         </div>
       </section>
 
@@ -156,6 +162,7 @@
             <div>
               <p class="eyebrow">Autentificare securizata</p>
               <h2>Intra in contul tau</h2>
+              <p class="hint">Foloseste email-ul si parola setate in Supabase.</p>
             </div>
             <form id="admin-login-form" class="admin-login-form" novalidate>
               <label for="admin-email">
@@ -225,7 +232,7 @@
                   <input type="hidden" id="student-id" />
                   <div class="form-grid">
                     <label>Nume elev<input id="student-name" required autocomplete="off" /></label>
-                    <label>Parinte<input id="parent-name"  required autocomplete="off" /></label>
+                    <label>Parinte <span class="hint" style="font-weight:400">(optional)</span><input id="parent-name" autocomplete="off" /></label>
                     <label>Telefon<input id="student-phone" required inputmode="tel" autocomplete="off" /></label>
                     <label>Observatii<input id="student-notes" autocomplete="off" /></label>
                   </div>
@@ -266,18 +273,10 @@
           </div>
 
         </div>
-      
       </section>
-      
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<footer class="site-footer">
-  <div class="footer-content">
-    <span>Contact: </span>
-    <a href="tel:+407xxxxxxxx">+40 775 147 463</a>
-  </div>
-</footer>
 
     <!-- App entry point (ES module) -->
     <script type="module" src="src/app.js"></script>
