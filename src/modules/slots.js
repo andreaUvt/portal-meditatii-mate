@@ -44,12 +44,10 @@ export async function fetchSlotsWithStudents() {
  * Save multiple slot updates at once (admin "Save all" button).
  * Each item: { id, status, studentId }
  *
- * Uses individual UPDATE calls (not upsert) so we only touch
- * the columns we're changing. Upsert would require sending all
- * NOT NULL columns (day, time) which we don't have here.
+ * Uses Supabase upsert in a single network call.
  */
 export async function saveSlotsBatch(updates) {
-  // Validate first – fail fast before any DB calls
+  // Validate each slot before sending to DB
   for (const slot of updates) {
     if (!VALID_STATUSES.includes(slot.status)) {
       throw new Error(`Status invalid: ${slot.status}`);
@@ -59,22 +57,17 @@ export async function saveSlotsBatch(updates) {
     }
   }
 
-  // Run all updates in parallel
-  const promises = updates.map(slot =>
-    supabase
-      .from('slots')
-      .update({
-        status:     slot.status,
-        student_id: slot.status === 'booked' ? slot.studentId : null,
-      })
-      .eq('id', slot.id)
-  );
+  const rows = updates.map(slot => ({
+    id:         slot.id,
+    status:     slot.status,
+    student_id: slot.status === 'booked' ? slot.studentId : null,
+  }));
 
-  const results = await Promise.all(promises);
+  const { error } = await supabase
+    .from('slots')
+    .upsert(rows, { onConflict: 'id' });
 
-  // Check if any update failed
-  const failed = results.find(r => r.error);
-  if (failed) throw failed.error;
+  if (error) throw error;
 }
 
 /**

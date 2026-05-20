@@ -333,73 +333,34 @@ async function handleParentLookup(event) {
   if (!phone) return;
 
   setLoading('lookup', true);
+  // Disable button to prevent double-submit (basic rate-limit UX)
   const btn = els.parentLookup.querySelector('button[type=submit]');
   btn.disabled = true;
 
   try {
-    // Returns [] if not found, or 1+ students sharing the same phone
-    const students = await lookupStudentByPhone(phone);
-
-    if (!students.length) {
+    const student = await lookupStudentByPhone(phone);
+    if (!student) {
       state.activeStudent = null;
       els.parentAccount.classList.add('hidden');
       els.parentEmpty.classList.remove('hidden');
       els.parentEmpty.innerHTML = `
         <strong>Nu am gasit un cont pentru acest numar.</strong>
-        <span>Verifica formatul sau adauga elevul din panoul admin.</span>
+        <span>Verifica formatul sau adauga parintele din panoul admin.</span>
       `;
       return;
     }
 
-    // Store first as active (used by payment flow)
-    state.activeStudent = students[0];
+    state.activeStudent = student;
     els.parentEmpty.classList.add('hidden');
     els.parentAccount.classList.remove('hidden');
-
-    if (students.length === 1) {
-      // Single student — render directly
-      renderParentAccount(students[0]);
-    } else {
-      // Multiple students on same phone — show picker first
-      renderStudentPicker(students);
-    }
+    renderParentAccount(student);
   } catch (err) {
     showToast('Eroare la cautare. Incearca din nou.');
   } finally {
     setLoading('lookup', false);
+    // Re-enable after brief delay (simple UX throttle)
     setTimeout(() => { btn.disabled = false; }, 800);
   }
-}
-
-/**
- * When multiple students share a phone number, show a simple
- * card-picker so the parent selects which child they're paying for.
- */
-function renderStudentPicker(students) {
-  els.parentAccount.innerHTML = `
-    <div class="panel" style="padding:18px">
-      <p class="eyebrow" style="margin-bottom:12px">Mai multi elevi pe acest numar</p>
-      <p class="hint" style="margin-bottom:16px">Alege elevul pentru care vrei sa vezi programul:</p>
-      <div class="student-picker">
-        ${students.map(s => `
-          <button class="picker-card" data-student-id="${escapeAttr(s.id)}" type="button">
-            <strong>${escapeHtml(s.studentName)}</strong>
-            ${s.parentName ? `<span>${escapeHtml(s.parentName)}</span>` : ''}
-          </button>
-        `).join('')}
-      </div>
-    </div>
-  `;
-
-  els.parentAccount.querySelectorAll('.picker-card').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const student = students.find(s => s.id === btn.dataset.studentId);
-      if (student) {
-        state.activeStudent = student;
-        renderParentAccount(student);
-      }
-    });
-  });
 }
 
 // ── Payments (parent-facing) ──────────────────────────────────
@@ -519,7 +480,7 @@ function renderParentAccount(student) {
     <div class="payment-box">
       <div class="row-title">
         <strong>${escapeHtml(student.studentName)}</strong>
-        <span>${student.parentName ? `Parinte: ${escapeHtml(student.parentName)} · ` : ''}Alege cate ore vrei sa platesti</span>
+        <span>Parinte: ${escapeHtml(student.parentName)} · Alege cate ore vrei sa platesti</span>
       </div>
       <div class="payment-options" id="payment-options">
         ${paymentOptionBtn('1', 1, 'O ora',     price)}
@@ -758,7 +719,7 @@ function renderStudents() {
     <div class="student-row">
       <div class="row-title">
         <strong>${escapeHtml(student.studentName)}</strong>
-        <span>${student.parentName ? escapeHtml(student.parentName) + ' – ' : ''}${escapeHtml(student.phone)}</span>
+        <span>${escapeHtml(student.parentName)} – ${escapeHtml(student.phone)}</span>
         ${student.notes ? `<span class="hint" style="font-size:0.82rem">${escapeHtml(student.notes)}</span>` : ''}
       </div>
       <div class="row-actions">
