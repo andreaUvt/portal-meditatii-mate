@@ -21,7 +21,24 @@
   --shadow: 0 18px 44px rgba(26, 32, 44, 0.12);
   color-scheme: light;
 }
+.site-footer {
+  margin-top: 60px;
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #ddd;
+  font-size: 0.95rem;
+  background: #fafafa;
+}
 
+.site-footer a {
+  color: #2b6cb0;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
 * {
   box-sizing: border-box;
 }
