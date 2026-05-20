@@ -1,0 +1,50 @@
+# ============================================================
+# Netlify configuration
+# ============================================================
+
+[build]
+  # If using Vite: command = "npm run build", publish = "dist"
+  # If no-build (static files): leave empty
+  # command = "npm run build"
+  # publish = "dist"
+
+# SPA routing – send all paths to index.html
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200
+
+# ── Security Headers ──────────────────────────────────────────
+# These apply to every response from Netlify.
+# Adjust Content-Security-Policy if you add more CDN dependencies.
+
+[[headers]]
+  for = "/*"
+
+  [headers.values]
+
+    # Prevents MIME-type sniffing
+    X-Content-Type-Options = "nosniff"
+
+    # Prevents your site being loaded in an iframe (clickjacking)
+    X-Frame-Options = "DENY"
+
+    # Enables browser XSS protection (legacy, but still good to have)
+    X-XSS-Protection = "1; mode=block"
+
+    # Referrer policy – don't leak URL to third parties
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Permissions policy – disable features you don't use
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+    # Content Security Policy
+    # supabase.co: API calls
+    # jsdelivr.net: Supabase JS CDN
+    # 'unsafe-inline': needed for inline scripts (the window.__ENV block)
+    #   To remove 'unsafe-inline', move credentials to a separate JS file
+    #   loaded via a nonce, or use Vite to bundle everything.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'"
+
+    # HSTS – tell browsers to always use HTTPS (Netlify enforces HTTPS anyway)
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains"
