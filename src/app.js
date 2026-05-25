@@ -14,7 +14,7 @@
 import { supabase }                             from './lib/supabase.js';
 import { adminSignIn, adminSignOut, getSession, onAuthChange } from './modules/auth.js';
 import { fetchStudents, lookupStudentByPhone, saveStudent, deleteStudent } from './modules/students.js';
-import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch }              from './modules/slots.js';
+import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch, createSlot, deleteSlot } from './modules/slots.js';
 import { fetchPaymentSettings, savePaymentSettings, createPayment, fetchPayments, updatePaymentStatus } from './modules/payments.js';
 import { escapeHtml, escapeAttr, ValidationError }             from './modules/validation.js';
 
@@ -63,6 +63,10 @@ const els = {
   studentNotes:    document.querySelector('#student-notes'),
   clearStudent:    document.querySelector('#clear-student'),
   studentList:     document.querySelector('#student-list'),
+  slotForm:        document.querySelector('#slot-form'),
+  slotDay:         document.querySelector('#slot-day'),
+  slotStart:       document.querySelector('#slot-start'),
+  slotEnd:         document.querySelector('#slot-end'),
   adminCalendar:   document.querySelector('#admin-calendar'),
   saveAllSlots:    document.querySelector('#save-all-slots'),
   adminLogout:     document.querySelector('#admin-logout'),
@@ -97,6 +101,7 @@ async function init() {
   els.adminLoginForm.addEventListener('submit', handleAdminLogin);
   els.studentForm.addEventListener('submit', handleStudentSave);
   els.settingsForm.addEventListener('submit', handleSettingsSave);
+  els.slotForm.addEventListener('submit', handleSlotCreate);
   els.clearStudent.addEventListener('click', clearStudentForm);
   els.saveAllSlots.addEventListener('click', handleSaveAllSlots);
   els.adminLogout.addEventListener('click', handleAdminLogout);
@@ -305,6 +310,44 @@ async function handleSaveAllSlots() {
 
 // ── Payment Settings ──────────────────────────────────────────
 
+async function handleSlotCreate(event) {
+  event.preventDefault();
+  setLoading('slotCreate', true);
+
+  try {
+    await createSlot({
+      day:       els.slotDay.value,
+      startTime: els.slotStart.value,
+      endTime:   els.slotEnd.value,
+    });
+    els.slotStart.value = '';
+    els.slotEnd.value   = '';
+    await loadAdminData();
+    showToast('Ora noua a fost adaugata.');
+  } catch (err) {
+    showToast(err.message || 'Eroare la adaugarea orei.');
+  } finally {
+    setLoading('slotCreate', false);
+  }
+}
+
+async function handleDeleteSlot(id) {
+  const slot = state.slots.find(s => s.id === id);
+  const label = slot ? `${slot.day} ${slot.time}` : 'aceasta ora';
+  if (!confirm(`Stergi ${label} din orar?`)) return;
+
+  setLoading('slotDelete', true);
+  try {
+    await deleteSlot(id);
+    await loadAdminData();
+    showToast('Ora a fost stearsa.');
+  } catch (err) {
+    showToast(err.message || 'Eroare la stergere ora.');
+  } finally {
+    setLoading('slotDelete', false);
+  }
+}
+
 async function handleSettingsSave(event) {
   event.preventDefault();
   setLoading('settings', true);
@@ -443,7 +486,10 @@ function renderPublicCalendar() {
 
 function renderParentAccount(student) {
   const price = state.settings?.pricePerHour ?? 50;
-  const studentSlots = state.slots.filter(s => s.studentId === student.id && s.status === 'booked');
+  const days = ['Luni', 'Marti', 'Miercuri', 'Joi', 'Vineri', 'Sambata', 'Duminica'];
+  const studentSlots = state.slots
+    .filter(s => s.studentId === student.id && s.status === 'booked')
+    .sort((a, b) => days.indexOf(a.day) - days.indexOf(b.day) || parseTime(a.time) - parseTime(b.time));
 
   const scheduleHtml = studentSlots.length
     ? studentSlots.map(s => `
@@ -764,9 +810,14 @@ function renderAdminCalendar() {
         <select data-slot-student="${escapeAttr(slot.id)}" aria-label="Elev ${escapeHtml(slot.day)} ${escapeHtml(slot.time)}">
           ${selectedStudentOption}
         </select>
+        <button class="ghost-button" data-delete-slot="${escapeAttr(slot.id)}" type="button">Sterge</button>
       </div>
     `;
   }).join('');
+
+  els.adminCalendar.querySelectorAll('[data-delete-slot]').forEach(btn => {
+    btn.addEventListener('click', () => handleDeleteSlot(btn.dataset.deleteSlot));
+  });
 }
 
 function renderPaymentsList() {
@@ -835,8 +886,11 @@ function getCalendarTimes() {
 }
 
 function parseTime(time) {
-  const [h, m] = String(time).split(':').map(Number);
-  return Number.isFinite(h) ? h * 60 + (m || 0) : 0;
+  const match = /(\d{1,2}):(\d{2})/.exec(String(time));
+  if (!match) return 0;
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : 0;
 }
 
 function emptyLine(text) {

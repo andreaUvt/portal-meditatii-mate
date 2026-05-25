@@ -78,6 +78,57 @@ export async function saveSlotsBatch(updates) {
 }
 
 /**
+ * Create a new weekly slot with an explicit start and end time.
+ * The database keeps time as text, so ranges are stored as "HH:MM-HH:MM".
+ */
+export async function createSlot({ day, startTime, endTime }) {
+  if (!VALID_DAYS.includes(day)) {
+    throw new Error('Alege o zi valida.');
+  }
+
+  const start = normalizeClock(startTime);
+  const end = normalizeClock(endTime);
+  if (!start || !end) {
+    throw new Error('Introdu ore valide pentru inceput si final.');
+  }
+  if (clockToMinutes(start) >= clockToMinutes(end)) {
+    throw new Error('Ora de final trebuie sa fie dupa ora de inceput.');
+  }
+
+  const { data, error } = await supabase
+    .from('slots')
+    .insert({
+      day,
+      time: `${start}-${end}`,
+      status: 'free',
+      student_id: null,
+    })
+    .select('id, day, time, status, student_id')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('Aceasta ora exista deja pentru ziua aleasa.');
+    }
+    throw error;
+  }
+
+  return mapSlot(data);
+}
+
+/**
+ * Delete a weekly slot from the schedule.
+ */
+export async function deleteSlot(id) {
+  const { error } = await supabase
+    .from('slots')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+/**
  * Update a single slot.
  */
 export async function saveSlot({ id, status, studentId }) {
@@ -107,4 +158,15 @@ function mapSlot(row) {
     status:    row.status,
     studentId: row.student_id ?? null,
   };
+}
+
+function normalizeClock(value) {
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(value ?? '').trim());
+  if (!match) return null;
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
+function clockToMinutes(value) {
+  const [hours, minutes] = value.split(':').map(Number);
+  return hours * 60 + minutes;
 }

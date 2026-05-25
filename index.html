@@ -257,6 +257,27 @@
                   <h2 id="admin-calendar-title">Marcheaza liber sau ocupat</h2>
                 </div>
               </div>
+              <form class="slot-form" id="slot-form" novalidate>
+                <label>Zi
+                  <select id="slot-day" required>
+                    <option value="Luni">Luni</option>
+                    <option value="Marti">Marti</option>
+                    <option value="Miercuri">Miercuri</option>
+                    <option value="Joi">Joi</option>
+                    <option value="Vineri">Vineri</option>
+                    <option value="Sambata">Sambata</option>
+                    <option value="Duminica">Duminica</option>
+                  </select>
+                </label>
+                <label>Inceput
+                  <input id="slot-start" type="time" step="300" required />
+                </label>
+                <label>Final
+                  <input id="slot-end" type="time" step="300" required />
+                </label>
+                <button type="submit">Adauga ora</button>
+              </form>
+              <p class="hint slot-hint">Exemplu: 14:30 pana la 15:30 va aparea in calendar ca 14:30-15:30.</p>
               <div class="admin-calendar" id="admin-calendar" aria-live="polite"></div>
             </section>
             <button class="ghost-button" id="save-all-slots" type="button"

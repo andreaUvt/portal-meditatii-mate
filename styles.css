@@ -750,6 +750,22 @@ h2 {
   gap: 12px;
 }
 
+.slot-form {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.9fr) repeat(2, minmax(120px, 0.75fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.slot-form button {
+  min-width: 128px;
+}
+
+.slot-hint {
+  margin-bottom: 16px;
+}
+
 .form-actions,
 .row-actions {
   display: flex;
@@ -775,7 +791,7 @@ h2 {
 }
 
 .slot-admin-row {
-  grid-template-columns: minmax(160px, 0.7fr) minmax(140px, 0.8fr) minmax(180px, 1fr);
+  grid-template-columns: minmax(160px, 0.7fr) minmax(140px, 0.8fr) minmax(180px, 1fr) auto;
 }
 
 /* NEW: Slots grid in parent view */
@@ -881,7 +897,8 @@ h2 {
   .checkout-summary,
   .method-switch,
   .payment-options,
-  .form-grid {
+  .form-grid,
+  .slot-form {
     grid-template-columns: 1fr;
   }
 
