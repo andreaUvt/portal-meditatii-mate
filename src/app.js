@@ -14,7 +14,7 @@
 import { supabase }                             from './lib/supabase.js';
 import { adminSignIn, adminSignOut, getSession, onAuthChange } from './modules/auth.js';
 import { fetchStudents, lookupStudentByPhone, saveStudent, deleteStudent } from './modules/students.js';
-import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch }              from './modules/slots.js';
+import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch, createSlot } from './modules/slots.js';
 import { fetchPaymentSettings, savePaymentSettings, createPayment, fetchPayments, updatePaymentStatus } from './modules/payments.js';
 import { escapeHtml, escapeAttr, ValidationError }             from './modules/validation.js';
 
@@ -55,6 +55,10 @@ const els = {
   settingsRevolut: document.querySelector('#settings-revolut'),
   settingsBtPay:   document.querySelector('#settings-btpay'),
   settingsPrice:   document.querySelector('#settings-price'),
+  slotForm:        document.querySelector('#slot-form'),
+  slotDay:         document.querySelector('#slot-day'),
+  slotStart:       document.querySelector('#slot-start'),
+  slotEnd:         document.querySelector('#slot-end'),
   studentForm:     document.querySelector('#student-form'),
   studentIdInput:  document.querySelector('#student-id'),
   studentName:     document.querySelector('#student-name'),
@@ -93,6 +97,7 @@ async function init() {
 
   // Wire up forms and buttons
   els.parentLookup.addEventListener('submit', handleParentLookup);
+  els.slotForm?.addEventListener('submit', handleAddSlot);
   els.backToPortal.addEventListener('click', () => navigateTo('portal'));
   els.adminLoginForm.addEventListener('submit', handleAdminLogin);
   els.studentForm.addEventListener('submit', handleStudentSave);
@@ -300,6 +305,36 @@ async function handleSaveAllSlots() {
     showToast(err.message || 'Eroare la salvare ore.');
   } finally {
     setLoading('slots', false);
+  }
+}
+
+// ── Add single slot (admin) ─────────────────────────────────────────
+
+async function handleAddSlot(event) {
+  event.preventDefault();
+  setLoading('addSlot', true);
+
+  try {
+    const day   = els.slotDay.value;
+    const start = els.slotStart.value;
+    const end   = els.slotEnd.value;
+
+    if (!day || !start || !end) {
+      showToast('Completeaza ziua, inceputul si finalul.');
+      return;
+    }
+
+    await createSlot({ day, startTime: start, endTime: end });
+
+    // Clear inputs and refresh admin data to show the new slot
+    els.slotStart.value = '';
+    els.slotEnd.value = '';
+    showToast('Ora adaugata.');
+    await loadAdminData();
+  } catch (err) {
+    showToast(err?.message || 'Eroare la adaugarea orei.');
+  } finally {
+    setLoading('addSlot', false);
   }
 }
 

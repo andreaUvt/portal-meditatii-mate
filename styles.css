@@ -983,6 +983,84 @@ h2 {
   transform: translateY(0);
 }
 
+.site-footer {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto 32px;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid rgba(23, 107, 135, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(233, 245, 248, 0.92)),
+    var(--panel);
+  box-shadow: 0 12px 32px rgba(26, 32, 44, 0.09);
+  padding: 22px clamp(18px, 4vw, 32px);
+}
+
+.footer-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.footer-kicker {
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.footer-copy strong {
+  color: var(--ink);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.footer-copy span:last-child {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.footer-phone {
+  display: grid;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 210px;
+  border: 1px solid rgba(32, 33, 36, 0.1);
+  border-radius: 8px;
+  background: #263238;
+  color: #fff;
+  padding: 13px 16px;
+  text-decoration: none;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.footer-phone:hover {
+  background: var(--accent-dark);
+  box-shadow: 0 10px 24px rgba(23, 107, 135, 0.2);
+  transform: translateY(-1px);
+}
+
+.footer-phone span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-phone strong {
+  font-size: 1.04rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 /* ──────────────────────────────────────────────────────────────
    RESPONSIVE
    ────────────────────────────────────────────────────────────── */
@@ -1028,6 +1106,16 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .footer-content {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .footer-phone {
+    width: 100%;
+    min-width: 0;
+  }
+
 
 
   /* Time-grid: show short day labels on medium screens */
@@ -1041,6 +1129,15 @@ h2 {
   .workspace {
     width: min(100% - 24px, 1180px);
     padding: 22px 0 44px;
+  }
+
+  .site-footer {
+    width: min(100% - 24px, 1180px);
+    margin-bottom: 20px;
+  }
+
+  .footer-content {
+    padding: 18px;
   }
 
   .topbar {
