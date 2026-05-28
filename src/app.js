@@ -452,7 +452,7 @@ async function handlePaymentStatusChange(id, status) {
 // Layout constants – change HOUR_PX to scale the entire grid
 const HOUR_PX   = 64;   // height of one hour row in pixels
 const HALF_PX   = HOUR_PX / 2;
-const GRID_START = 6;   // first hour shown (6 = 6:00)
+const GRID_START = 13;  // first hour shown (13 = 13:00)
 const GRID_END   = 23;  // last hour shown  (23 = 23:00)
 
 function renderPublicCalendar() {
