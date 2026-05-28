@@ -338,7 +338,7 @@ async function handleParentLookup(event) {
 
   try {
     // Returns [] if not found, or 1+ students sharing the same phone
-    const students = await lookupStudentByPhone(phone);
+    const students = await lookupStudentByPhone(phone) || [];
 
     if (!students.length) {
       state.activeStudent = null;
@@ -450,7 +450,7 @@ async function handlePaymentStatusChange(id, status) {
 // ── Render: Public Calendar (time-grid week view) ────────────
 
 // Layout constants – change HOUR_PX to scale the entire grid
-const HOUR_PX   = 64;   // height of one hour row in pixels
+const HOUR_PX   = 56;   // height of one hour row in pixels
 const HALF_PX   = HOUR_PX / 2;
 const GRID_START = 13;  // first hour shown (13 = 13:00)
 const GRID_END   = 23;  // last hour shown  (23 = 23:00)

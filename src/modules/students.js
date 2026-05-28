@@ -46,7 +46,7 @@ export async function fetchStudents() {
  */
 export async function lookupStudentByPhone(rawPhone) {
   const phone = sanitizePhone(rawPhone);
-  if (!phone) return null;
+  if (!phone) return [];
 
   // Try exact match, then normalised variants
   const variants = phoneVariants(phone);
@@ -55,19 +55,17 @@ export async function lookupStudentByPhone(rawPhone) {
     .from('students')
     .select('id, student_name, parent_name, phone')
     .is('deleted_at', null)
-    .in('phone', variants)
-    .limit(1);
+    .in('phone', variants);
 
   if (error) throw error;
-  if (!data?.length) return null;
+  if (!data?.length) return [];
 
-  const row = data[0];
-  return {
+  return data.map(row => ({
     id:          row.id,
     studentName: row.student_name,
     parentName:  row.parent_name,
     phone:       row.phone,
-  };
+  }));
 }
 
 /**
