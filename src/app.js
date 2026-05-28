@@ -14,7 +14,7 @@
 import { supabase }                             from './lib/supabase.js';
 import { adminSignIn, adminSignOut, getSession, onAuthChange } from './modules/auth.js';
 import { fetchStudents, lookupStudentByPhone, saveStudent, deleteStudent } from './modules/students.js';
-import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch, createSlot, deleteSlot } from './modules/slots.js';
+import { fetchSlots, fetchSlotsWithStudents, saveSlotsBatch }              from './modules/slots.js';
 import { fetchPaymentSettings, savePaymentSettings, createPayment, fetchPayments, updatePaymentStatus } from './modules/payments.js';
 import { escapeHtml, escapeAttr, ValidationError }             from './modules/validation.js';
 
@@ -63,10 +63,6 @@ const els = {
   studentNotes:    document.querySelector('#student-notes'),
   clearStudent:    document.querySelector('#clear-student'),
   studentList:     document.querySelector('#student-list'),
-  slotForm:        document.querySelector('#slot-form'),
-  slotDay:         document.querySelector('#slot-day'),
-  slotStart:       document.querySelector('#slot-start'),
-  slotEnd:         document.querySelector('#slot-end'),
   adminCalendar:   document.querySelector('#admin-calendar'),
   saveAllSlots:    document.querySelector('#save-all-slots'),
   adminLogout:     document.querySelector('#admin-logout'),
@@ -101,7 +97,6 @@ async function init() {
   els.adminLoginForm.addEventListener('submit', handleAdminLogin);
   els.studentForm.addEventListener('submit', handleStudentSave);
   els.settingsForm.addEventListener('submit', handleSettingsSave);
-  els.slotForm.addEventListener('submit', handleSlotCreate);
   els.clearStudent.addEventListener('click', clearStudentForm);
   els.saveAllSlots.addEventListener('click', handleSaveAllSlots);
   els.adminLogout.addEventListener('click', handleAdminLogout);
@@ -310,44 +305,6 @@ async function handleSaveAllSlots() {
 
 // ── Payment Settings ──────────────────────────────────────────
 
-async function handleSlotCreate(event) {
-  event.preventDefault();
-  setLoading('slotCreate', true);
-
-  try {
-    await createSlot({
-      day:       els.slotDay.value,
-      startTime: els.slotStart.value,
-      endTime:   els.slotEnd.value,
-    });
-    els.slotStart.value = '';
-    els.slotEnd.value   = '';
-    await loadAdminData();
-    showToast('Ora noua a fost adaugata.');
-  } catch (err) {
-    showToast(err.message || 'Eroare la adaugarea orei.');
-  } finally {
-    setLoading('slotCreate', false);
-  }
-}
-
-async function handleDeleteSlot(id) {
-  const slot = state.slots.find(s => s.id === id);
-  const label = slot ? `${slot.day} ${slot.time}` : 'aceasta ora';
-  if (!confirm(`Stergi ${label} din orar?`)) return;
-
-  setLoading('slotDelete', true);
-  try {
-    await deleteSlot(id);
-    await loadAdminData();
-    showToast('Ora a fost stearsa.');
-  } catch (err) {
-    showToast(err.message || 'Eroare la stergere ora.');
-  } finally {
-    setLoading('slotDelete', false);
-  }
-}
-
 async function handleSettingsSave(event) {
   event.preventDefault();
   setLoading('settings', true);
@@ -376,34 +333,73 @@ async function handleParentLookup(event) {
   if (!phone) return;
 
   setLoading('lookup', true);
-  // Disable button to prevent double-submit (basic rate-limit UX)
   const btn = els.parentLookup.querySelector('button[type=submit]');
   btn.disabled = true;
 
   try {
-    const student = await lookupStudentByPhone(phone);
-    if (!student) {
+    // Returns [] if not found, or 1+ students sharing the same phone
+    const students = await lookupStudentByPhone(phone);
+
+    if (!students.length) {
       state.activeStudent = null;
       els.parentAccount.classList.add('hidden');
       els.parentEmpty.classList.remove('hidden');
       els.parentEmpty.innerHTML = `
         <strong>Nu am gasit un cont pentru acest numar.</strong>
-        <span>Verifica formatul sau adauga parintele din panoul admin.</span>
+        <span>Verifica formatul sau adauga elevul din panoul admin.</span>
       `;
       return;
     }
 
-    state.activeStudent = student;
+    // Store first as active (used by payment flow)
+    state.activeStudent = students[0];
     els.parentEmpty.classList.add('hidden');
     els.parentAccount.classList.remove('hidden');
-    renderParentAccount(student);
+
+    if (students.length === 1) {
+      // Single student — render directly
+      renderParentAccount(students[0]);
+    } else {
+      // Multiple students on same phone — show picker first
+      renderStudentPicker(students);
+    }
   } catch (err) {
     showToast('Eroare la cautare. Incearca din nou.');
   } finally {
     setLoading('lookup', false);
-    // Re-enable after brief delay (simple UX throttle)
     setTimeout(() => { btn.disabled = false; }, 800);
   }
+}
+
+/**
+ * When multiple students share a phone number, show a simple
+ * card-picker so the parent selects which child they're paying for.
+ */
+function renderStudentPicker(students) {
+  els.parentAccount.innerHTML = `
+    <div class="panel" style="padding:18px">
+      <p class="eyebrow" style="margin-bottom:12px">Mai multi elevi pe acest numar</p>
+      <p class="hint" style="margin-bottom:16px">Alege elevul pentru care vrei sa vezi programul:</p>
+      <div class="student-picker">
+        ${students.map(s => `
+          <button class="picker-card" data-student-id="${escapeAttr(s.id)}" type="button">
+            <strong>${escapeHtml(s.studentName)}</strong>
+            ${s.parentName ? `<span>${escapeHtml(s.parentName)}</span>` : ''}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  els.parentAccount.querySelectorAll('.picker-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const student = students.find(s => s.id === btn.dataset.studentId);
+      if (student) {
+        state.activeStudent = student;
+        renderParentAccount(student);
+      }
+    });
+  });
 }
 
 // ── Payments (parent-facing) ──────────────────────────────────
@@ -451,45 +447,147 @@ async function handlePaymentStatusChange(id, status) {
   }
 }
 
-// ── Render: Public Calendar ───────────────────────────────────
+// ── Render: Public Calendar (time-grid week view) ────────────
+
+// Layout constants – change HOUR_PX to scale the entire grid
+const HOUR_PX   = 64;   // height of one hour row in pixels
+const HALF_PX   = HOUR_PX / 2;
+const GRID_START = 6;   // first hour shown (6 = 6:00)
+const GRID_END   = 23;  // last hour shown  (23 = 23:00)
 
 function renderPublicCalendar() {
-  const days  = getCalendarDays();
-  const times = getCalendarTimes();
+  const ALL_DAYS = ['Luni', 'Marti', 'Miercuri', 'Joi', 'Vineri', 'Sambata', 'Duminica'];
 
-  if (!days.length) {
+  if (!state.slots.length) {
     els.publicCalendar.innerHTML = '<p class="hint">Nu exista ore disponibile momentan.</p>';
     return;
   }
 
-  const headers = days.map(d => `<th>${escapeHtml(d)}</th>`).join('');
-  const rows = times.map(time => {
-    const cells = days.map(day => {
-      const slot = state.slots.find(s => s.day === day && s.time === time);
-      if (!slot) return '<td></td>';
-      const cls   = slot.status === 'booked' ? 'busy'   : 'free';
-      const label = slot.status === 'booked' ? 'Ocupat' : 'Liber';
-      return `<td class="slot-cell"><div class="slot ${cls}"><strong>${label}</strong></div></td>`;
+  // Which days actually have at least one slot?
+  const activeDays = ALL_DAYS.filter(d => state.slots.some(s => s.day === d));
+
+  els.publicCalendar.innerHTML = buildTimeGrid(activeDays, state.slots, false);
+}
+
+/**
+ * Build a full time-grid HTML string.
+ *
+ * @param {string[]} days       - Ordered day labels to show as columns
+ * @param {object[]} slots      - Slot objects { day, time, status, studentName? }
+ * @param {boolean}  isAdmin    - If true, renders editable selects inside each event
+ * @returns {string}            - HTML string for the grid container
+ */
+function buildTimeGrid(days, slots, isAdmin) {
+  const totalHours  = GRID_END - GRID_START;
+  const totalHeight = totalHours * HOUR_PX;
+
+  // ── Time gutter (left labels) ─────────────────────────────────
+  let timeGutter = '';
+  for (let h = GRID_START; h <= GRID_END; h++) {
+    const top = (h - GRID_START) * HOUR_PX;
+    const label = h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
+    timeGutter += `<div class="tg-hour-label" style="top:${top}px">${label}</div>`;
+  }
+
+  // ── Column headers ────────────────────────────────────────────
+  const dayShort = { Luni:'Lu', Marti:'Ma', Miercuri:'Mi', Joi:'Jo', Vineri:'Vi', Sambata:'Sb', Duminica:'Du' };
+  const colHeaders = days.map(d =>
+    `<div class="tg-col-header"><span class="tg-day-short">${dayShort[d] ?? d}</span><span class="tg-day-full">${d}</span></div>`
+  ).join('');
+
+  // ── Background grid lines (per column) ───────────────────────
+  let bgLines = '';
+  for (let h = GRID_START; h < GRID_END; h++) {
+    const top     = (h - GRID_START) * HOUR_PX;
+    const halfTop = top + HALF_PX;
+    bgLines += `<div class="tg-line-hour"  style="top:${top}px"></div>`;
+    bgLines += `<div class="tg-line-half"  style="top:${halfTop}px"></div>`;
+  }
+  // Final hour line at the bottom
+  bgLines += `<div class="tg-line-hour" style="top:${totalHeight}px"></div>`;
+
+  // ── Student options for admin dropdowns ───────────────────────
+  const studentOptions = isAdmin ? [
+    '<option value="">Neatribuit</option>',
+    ...state.students.map(s => `<option value="${escapeAttr(s.id)}">${escapeHtml(s.studentName)}</option>`),
+  ].join('') : '';
+
+  // ── Event blocks per day ──────────────────────────────────────
+  const cols = days.map(day => {
+    const daySlots = slots
+      .filter(s => s.day === day)
+      .sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+    const events = daySlots.map((slot, i) => {
+const [startMin, endMin] = parseTimeRange(slot.time);
+    const top      = ((startMin - GRID_START * 60) / 60) * HOUR_PX;
+      const durationMin = Math.max(endMin - startMin, 30); // minimum 30 min tall
+      const height     = (durationMin / 60) * HOUR_PX - 2; // 2px gap between events
+
+      if (isAdmin) {
+        // Admin: editable dropdowns inside the event block
+        const selectedOpt = studentOptions.replace(
+          `value="${escapeAttr(slot.studentId ?? '')}"`,
+          `value="${escapeAttr(slot.studentId ?? '')}" selected`
+        );
+        const isBooked = slot.status === 'booked';
+        return `
+          <div class="tg-event tg-event--${slot.status}" style="top:${top}px;height:${height}px"
+               data-slot-id="${escapeAttr(slot.id)}">
+            <div class="tg-event-time">${escapeHtml(slot.time)}</div>
+            <div class="tg-event-controls">
+              <select class="tg-select" data-slot-status="${escapeAttr(slot.id)}"
+                      aria-label="Status ${escapeHtml(slot.day)} ${escapeHtml(slot.time)}">
+                <option value="free"   ${!isBooked ? 'selected' : ''}>Liber</option>
+                <option value="booked" ${ isBooked ? 'selected' : ''}>Ocupat</option>
+              </select>
+              <select class="tg-select" data-slot-student="${escapeAttr(slot.id)}"
+                      aria-label="Elev ${escapeHtml(slot.day)} ${escapeHtml(slot.time)}">
+                ${selectedOpt}
+              </select>
+            </div>
+            ${isBooked && slot.studentName
+              ? `<div class="tg-event-name">${escapeHtml(slot.studentName)}</div>`
+              : ''}
+          </div>`;
+      } else {
+        // Public: read-only coloured block
+        const isBooked = slot.status === 'booked';
+        const label    = isBooked ? 'Ocupat' : 'Liber';
+        return `
+          <div class="tg-event tg-event--${slot.status}" style="top:${top}px;height:${height}px"
+               role="img" aria-label="${escapeAttr(slot.day)} ${escapeAttr(slot.time)} – ${label}">
+            <div class="tg-event-time">${escapeHtml(slot.time)}</div>
+            <div class="tg-event-label">${label}</div>
+          </div>`;
+      }
     }).join('');
-    return `<tr><td class="time-cell">${escapeHtml(time)}</td>${cells}</tr>`;
+
+    return `
+      <div class="tg-col" style="height:${totalHeight}px">
+        ${bgLines}
+        ${events}
+      </div>`;
   }).join('');
 
-  els.publicCalendar.innerHTML = `
-    <table class="calendar-table" role="grid" aria-label="Calendar disponibilitate">
-      <thead><tr><th scope="col">Ora</th>${headers}</tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+  return `
+    <div class="time-grid" role="region" aria-label="Calendar disponibilitate">
+      <div class="tg-header">
+        <div class="tg-gutter-placeholder"></div>
+        ${colHeaders}
+      </div>
+      <div class="tg-body">
+        <div class="tg-gutter">${timeGutter}</div>
+        <div class="tg-cols">${cols}</div>
+      </div>
+    </div>`;
 }
 
 // ── Render: Parent Account ────────────────────────────────────
 
 function renderParentAccount(student) {
   const price = state.settings?.pricePerHour ?? 50;
-  const days = ['Luni', 'Marti', 'Miercuri', 'Joi', 'Vineri', 'Sambata', 'Duminica'];
-  const studentSlots = state.slots
-    .filter(s => s.studentId === student.id && s.status === 'booked')
-    .sort((a, b) => days.indexOf(a.day) - days.indexOf(b.day) || parseTime(a.time) - parseTime(b.time));
+  const studentSlots = state.slots.filter(s => s.studentId === student.id && s.status === 'booked');
 
   const scheduleHtml = studentSlots.length
     ? studentSlots.map(s => `
@@ -526,7 +624,7 @@ function renderParentAccount(student) {
     <div class="payment-box">
       <div class="row-title">
         <strong>${escapeHtml(student.studentName)}</strong>
-        <span>Parinte: ${escapeHtml(student.parentName)} · Alege cate ore vrei sa platesti</span>
+        <span>${student.parentName ? `Parinte: ${escapeHtml(student.parentName)} · ` : ''}Alege cate ore vrei sa platesti</span>
       </div>
       <div class="payment-options" id="payment-options">
         ${paymentOptionBtn('1', 1, 'O ora',     price)}
@@ -765,7 +863,7 @@ function renderStudents() {
     <div class="student-row">
       <div class="row-title">
         <strong>${escapeHtml(student.studentName)}</strong>
-        <span>${escapeHtml(student.parentName)} – ${escapeHtml(student.phone)}</span>
+        <span>${student.parentName ? escapeHtml(student.parentName) + ' – ' : ''}${escapeHtml(student.phone)}</span>
         ${student.notes ? `<span class="hint" style="font-size:0.82rem">${escapeHtml(student.notes)}</span>` : ''}
       </div>
       <div class="row-actions">
@@ -785,39 +883,9 @@ function renderStudents() {
 }
 
 function renderAdminCalendar() {
-  const studentOptions = [
-    `<option value="">Neatribuit</option>`,
-    ...state.students.map(s => `<option value="${escapeAttr(s.id)}">${escapeHtml(s.studentName)}</option>`),
-  ].join('');
-
-  const days  = getCalendarDays();
-  const sorted = [...state.slots].sort((a, b) =>
-    days.indexOf(a.day) - days.indexOf(b.day) || parseTime(a.time) - parseTime(b.time)
-  );
-
-  els.adminCalendar.innerHTML = sorted.map(slot => {
-    const selectedStudentOption = studentOptions.replace(
-      `value="${escapeAttr(slot.studentId ?? '')}"`,
-      `value="${escapeAttr(slot.studentId ?? '')}" selected`
-    );
-    return `
-      <div class="slot-admin-row">
-        <strong>${escapeHtml(slot.day)} – ${escapeHtml(slot.time)}</strong>
-        <select data-slot-status="${escapeAttr(slot.id)}" aria-label="Status ${escapeHtml(slot.day)} ${escapeHtml(slot.time)}">
-          <option value="free"   ${slot.status === 'free'   ? 'selected' : ''}>Liber</option>
-          <option value="booked" ${slot.status === 'booked' ? 'selected' : ''}>Ocupat</option>
-        </select>
-        <select data-slot-student="${escapeAttr(slot.id)}" aria-label="Elev ${escapeHtml(slot.day)} ${escapeHtml(slot.time)}">
-          ${selectedStudentOption}
-        </select>
-        <button class="ghost-button" data-delete-slot="${escapeAttr(slot.id)}" type="button">Sterge</button>
-      </div>
-    `;
-  }).join('');
-
-  els.adminCalendar.querySelectorAll('[data-delete-slot]').forEach(btn => {
-    btn.addEventListener('click', () => handleDeleteSlot(btn.dataset.deleteSlot));
-  });
+  const ALL_DAYS = ['Luni', 'Marti', 'Miercuri', 'Joi', 'Vineri', 'Sambata', 'Duminica'];
+  const activeDays = ALL_DAYS.filter(d => state.slots.some(s => s.day === d));
+  els.adminCalendar.innerHTML = buildTimeGrid(activeDays, state.slots, true);
 }
 
 function renderPaymentsList() {
@@ -886,11 +954,19 @@ function getCalendarTimes() {
 }
 
 function parseTime(time) {
-  const match = /(\d{1,2}):(\d{2})/.exec(String(time));
-  if (!match) return 0;
-  const h = Number(match[1]);
-  const m = Number(match[2]);
-  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : 0;
+  const raw = String(time ?? '').trim();
+  const [start] = raw.split('-').map(part => part.trim());
+  const parts = start.split(':').map(Number);
+  const [h, m] = parts;
+  return Number.isFinite(h) ? h * 60 + (m || 0) : 0;
+}
+
+function parseTimeRange(time) {
+  const raw = String(time ?? '').trim();
+  const [start, end] = raw.split('-').map(part => part.trim());
+  const startMin = parseTime(start);
+  const endMin = parseTime(end);
+  return [startMin, endMin > startMin ? endMin : startMin + 60];
 }
 
 function emptyLine(text) {

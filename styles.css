@@ -21,24 +21,7 @@
   --shadow: 0 18px 44px rgba(26, 32, 44, 0.12);
   color-scheme: light;
 }
-.site-footer {
-  margin-top: 60px;
-  padding: 20px;
-  text-align: center;
-  border-top: 1px solid #ddd;
-  font-size: 0.95rem;
-  background: #fafafa;
-}
 
-.site-footer a {
-  color: #2b6cb0;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.site-footer a:hover {
-  text-decoration: underline;
-}
 * {
   box-sizing: border-box;
 }
@@ -583,16 +566,6 @@ h2 {
 .history-row,
 .student-row,
 .payment-row,
-.slot-admin-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-  padding: 12px;
-}
 
 .row-title {
   display: grid;
@@ -664,56 +637,225 @@ h2 {
   background: var(--red);
 }
 
-.calendar-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
+/* ── Time-Grid Calendar (replaces old .calendar-table) ──────── */
 
-.calendar-table th,
-.calendar-table td {
-  border: 1px solid var(--line);
-  padding: 8px;
-  text-align: center;
-  vertical-align: top;
-}
-
-.calendar-table th {
-  background: var(--panel);
-  font-weight: 700;
-  position: sticky;
-  top: 94px;
-  z-index: 1;
-}
-
-.calendar-table .time-cell {
-  font-weight: 900;
-  background: var(--blue-soft);
-  width: 80px;
-}
-
-.calendar-table .slot-cell {
-  width: 150px;
-  height: 60px;
-}
-
-.calendar-table .slot {
+.time-grid {
   display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  font-size: 0.82rem;
+  user-select: none;
+}
+
+/* ── Header row (day labels) ─────────────────────────────────── */
+.tg-header {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky;
+  top: 78px;
+  z-index: 4;
+}
+
+.tg-gutter-placeholder {
+  flex: 0 0 52px;
+  border-right: 1px solid var(--line);
+}
+
+.tg-col-header {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  padding: 10px 4px;
+  border-right: 1px solid var(--line);
+  min-width: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.calendar-table .slot.free {
+.tg-col-header:last-child {
+  border-right: 0;
+}
+
+.tg-day-short {
+  display: none;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tg-day-full {
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+/* ── Body (gutter + columns) ─────────────────────────────────── */
+.tg-body {
+  display: flex;
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 560px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Left gutter (time labels) ───────────────────────────────── */
+.tg-gutter {
+  flex: 0 0 52px;
+  position: relative;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  /* height is set by the tallest column; labels are absolute */
+}
+
+.tg-hour-label {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ── Columns wrapper ─────────────────────────────────────────── */
+.tg-cols {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Single day column ───────────────────────────────────────── */
+.tg-col {
+  flex: 1;
+  position: relative;
+  border-right: 1px solid var(--line);
+  min-width: 80px;   /* minimum so events are readable on mobile */
+}
+
+.tg-col:last-child {
+  border-right: 0;
+}
+
+/* ── Background grid lines ───────────────────────────────────── */
+.tg-line-hour,
+.tg-line-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.tg-line-hour {
+  border-top: 1px solid var(--line);
+  z-index: 0;
+}
+
+.tg-line-half {
+  border-top: 1px dashed rgba(217, 221, 227, 0.6);
+  z-index: 0;
+}
+
+/* ── Event blocks ────────────────────────────────────────────── */
+.tg-event {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  border-radius: 6px;
+  padding: 5px 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 1;
+  transition: filter 120ms ease, transform 120ms ease;
+  cursor: default;
+}
+
+.tg-event:hover {
+  filter: brightness(0.96);
+  transform: scale(1.012);
+  z-index: 2;
+}
+
+/* Free slot – green tint */
+.tg-event--free {
   background: var(--green-soft);
+  border: 1px solid rgba(44, 122, 75, 0.25);
   color: var(--green);
 }
 
-.calendar-table .slot.busy {
-  background: var(--red-soft);
-  color: var(--red);
+/* Booked slot – accent blue tint */
+.tg-event--booked {
+  background: var(--blue-soft);
+  border: 1px solid rgba(23, 107, 135, 0.28);
+  color: var(--accent-dark);
+}
+
+.tg-event-time {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  opacity: 0.75;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tg-event-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tg-event-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Admin-mode event controls ───────────────────────────────── */
+.tg-event-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.tg-select {
+  width: 100%;
+  min-height: 26px;
+  height: 26px;
+  padding: 2px 5px;
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.85);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* override global input styles */
+  line-height: 1.2;
+}
+
+.tg-select:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: #fff;
+}
+
+/* Admin calendar wrapper – add a little top space */
+#admin-calendar .time-grid {
+  margin-top: 4px;
 }
 
 /* NEW: Admin login form (replaces PIN form) */
@@ -750,22 +892,6 @@ h2 {
   gap: 12px;
 }
 
-.slot-form {
-  display: grid;
-  grid-template-columns: minmax(140px, 0.9fr) repeat(2, minmax(120px, 0.75fr)) auto;
-  gap: 12px;
-  align-items: end;
-  margin-bottom: 8px;
-}
-
-.slot-form button {
-  min-width: 128px;
-}
-
-.slot-hint {
-  margin-bottom: 16px;
-}
-
 .form-actions,
 .row-actions {
   display: flex;
@@ -773,8 +899,7 @@ h2 {
   gap: 8px;
 }
 
-.row-actions button,
-.slot-admin-row button {
+.row-actions button {
   min-height: 34px;
   padding: 0 10px;
   font-size: 0.85rem;
@@ -790,9 +915,6 @@ h2 {
   box-shadow: none;
 }
 
-.slot-admin-row {
-  grid-template-columns: minmax(160px, 0.7fr) minmax(140px, 0.8fr) minmax(180px, 1fr) auto;
-}
 
 /* NEW: Slots grid in parent view */
 .slots-grid {
@@ -897,8 +1019,7 @@ h2 {
   .checkout-summary,
   .method-switch,
   .payment-options,
-  .form-grid,
-  .slot-form {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -907,22 +1028,13 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .slot-admin-row {
-    grid-template-columns: 1fr;
-  }
 
-  .calendar-table {
-    font-size: 0.8rem;
-  }
 
-  .calendar-table .time-cell {
-    width: 60px;
-  }
-
-  .calendar-table .slot-cell {
-    width: 100px;
-    height: 50px;
-  }
+  /* Time-grid: show short day labels on medium screens */
+  .tg-day-full  { display: none; }
+  .tg-day-short { display: block; }
+  .tg-col { min-width: 60px; }
+  .tg-body { max-height: 480px; }
 }
 
 @media (max-width: 560px) {
@@ -1002,18 +1114,16 @@ h2 {
     font-size: 1.18rem;
   }
 
-  .calendar-table {
-    font-size: 0.75rem;
-  }
-
-  .calendar-table .time-cell {
-    width: 50px;
-  }
-
-  .calendar-table .slot-cell {
-    width: 80px;
-    height: 40px;
-  }
+  /* Time-grid mobile: compact column headers */
+  .tg-gutter-placeholder,
+  .tg-gutter { flex: 0 0 40px; }
+  .tg-hour-label { font-size: 0.65rem; right: 4px; }
+  .tg-col { min-width: 52px; }
+  .tg-event { padding: 3px 4px; }
+  .tg-event-time { font-size: 0.65rem; }
+  .tg-event-label { font-size: 0.7rem; }
+  .tg-body { max-height: 420px; }
+  .tg-select { font-size: 0.64rem; min-height: 22px; height: 22px; }
 
   .transfer-line {
     display: grid;
@@ -1037,9 +1147,7 @@ h2 {
     max-width: calc(100% - 24px);
   }
 
-  .slot-admin-row {
-    gap: 8px;
-  }
+
 }
 
 /* ── Reduced motion ───────────────────────────────────────── */
@@ -1048,4 +1156,40 @@ h2 {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* NEW: Multi-student picker (when siblings share a phone) */
+.student-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.picker-card {
+  display: grid;
+  gap: 4px;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 400;
+}
+
+.picker-card strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.picker-card span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.picker-card:hover {
+  border-color: var(--accent);
+  background: var(--blue-soft);
+  box-shadow: none;
 }
