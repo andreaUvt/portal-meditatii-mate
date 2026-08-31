@@ -156,18 +156,43 @@ nav {
 }
 .hero-badge {
   position: absolute;
-  bottom: 12px; left: 12px;
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(6px);
-  border-radius: 8px;
-  padding: .6rem .9rem;
-  box-shadow: var(--shadow);
-  max-width: calc(100% - 24px);
-}
-.hero-badge p { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .1rem; }
-.hero-badge strong { font-family: var(--ff-head); font-size: 1.05rem; color: var(--navy); font-weight: 600; }
-.hero-badge strong em { font-style: normal; color: var(--gold); }
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+
+  box-shadow: var(--shadow);
+
+  width: 80%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.hero-badge p {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.hero-badge strong {
+  font-family: var(--ff-head);
+  font-size: 1.7rem;
+  color: var(--navy);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.hero-badge strong em {
+  font-style: normal;
+  color: var(--gold);
+}
 @media (min-width: 780px) {
   .hero-inner { grid-template-columns: 1fr 1fr; }
   .hero-img { height: 420px; }
@@ -734,4 +759,41 @@ footer { background: #111c36; padding: 2rem 0; border-top: 1px solid rgba(247,24
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.hero-availability {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 2.2rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.availability-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.12);
+}
+
+.hero-availability div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.hero-availability strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hero-availability span:not(.availability-dot) {
+  font-size: 0.8rem;
+  opacity: 0.6;
 }
