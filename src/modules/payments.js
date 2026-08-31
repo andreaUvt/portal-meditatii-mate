@@ -54,15 +54,19 @@ export async function savePaymentSettings({ iban, revolut, btPay, pricePerHour }
 // ── Payments ──────────────────────────────────────────────────
 
 /**
- * Record a pending payment intent (parent-facing).
- * Creates a pending record so admin can confirm later.
+ * Log a payment (admin-facing — there's no parent self-service
+ * flow anymore, admin records payments directly as they come in).
+ * `hours` doubles as a generic quantity field (e.g. months prepaid).
  *
  * @returns {string} payment id
  */
-export async function createPayment({ studentId, hours, amountLei, method }) {
+export async function createPayment({ studentId, hours, amountLei, method, status = 'confirmed', notes = '' }) {
   if (!VALID_METHODS.includes(method)) throw new ValidationError('Metoda de plata invalida.');
-  if (!Number.isInteger(hours) || hours < 1) throw new ValidationError('Numar de ore invalid.');
+  if (!VALID_STATUSES.includes(status)) throw new ValidationError('Status invalid.');
+  if (!Number.isInteger(hours) || hours < 1) throw new ValidationError('Numar de unitati invalid.');
   if (!Number.isInteger(amountLei) || amountLei < 1) throw new ValidationError('Suma invalida.');
+
+  const cleanNotes = sanitizeText(notes ?? '', 'Note', 500, false);
 
   const { data, error } = await supabase
     .from('payments')
@@ -71,7 +75,8 @@ export async function createPayment({ studentId, hours, amountLei, method }) {
       hours,
       amount_lei: amountLei,
       method,
-      status: 'pending',
+      status,
+      notes: cleanNotes,
     })
     .select('id')
     .single();

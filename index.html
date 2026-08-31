@@ -1,25 +1,17 @@
 <!doctype html>
 <html lang="ro">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Portal meditatii online la matematica - programare si plati" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Meditatii Mate — Matematica pentru elevi, incredere pentru parinti</title>
+    <meta name="description" content="Meditatii de matematica individuale, online, pentru elevi cls. V-VIII. Algebra si geometrie, explicate cu rabdare. Vezi planuri si preturi." />
 
-    <!-- Security headers via meta (Vercel/Netlify can also set these as HTTP headers) -->
-    <!-- Content-Security-Policy is better set server-side; these are fallbacks -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-
-    <title>Portal Meditatii Mate</title>
-
-    <!-- Supabase JS (ESM via CDN – no build step needed) -->
-    <!-- NOTE: In production with Vite, these script tags are replaced by bundled imports -->
-    <!-- For no-build deployment, this CDN approach works fine -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Nunito:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="styles.css" />
 
-    <!-- Inline env injection for no-build deployments (Netlify/Vercel inject via _redirects or edge functions) -->
-    <!-- For Vite builds, import.meta.env is used instead – see src/lib/supabase.js -->
-    <!-- REPLACE the values below with your actual Supabase project credentials -->
     <script>
       window.__ENV = {
         SUPABASE_URL:      "https://xsqawwbnmwprfkbmugqm.supabase.co",
@@ -28,284 +20,566 @@
     </script>
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="#portal" aria-label="Portal Meditatii Mate">
-        <span class="brand-mark" aria-hidden="true">M</span>
-        <span>
-          <strong>Portal Meditatii Mate</strong>
-          <small>meditatii online la matematica</small>
-        </span>
-      </a>
-      <nav class="tabs" aria-label="Navigare principala">
-        <button class="tab-button active" data-view="portal"   type="button">Portal parinti</button>
-        <button class="tab-button"        data-view="calendar" type="button">Calendar</button>
-        <button class="tab-button"        data-view="admin"    type="button">Admin</button>
+
+    <!-- ═══════════════════════ PUBLIC SITE ═══════════════════════ -->
+    <div id="site-public">
+
+      <nav>
+        <div class="container nav-inner">
+          <a href="#acasa" class="nav-brand">Mate<span>Logic</span></a>
+          <ul class="nav-links" role="list">
+            <li><a href="#despre">Despre</a></li>
+            <li><a href="#planuri">Planuri &amp; preturi</a></li>
+            <li><a href="#inscriere">Inscriere</a></li>
+          </ul>
+          <a href="#inscriere" class="nav-cta">Trimite o cerere</a>
+          <button class="hamburger" id="hamburger" aria-label="Deschide meniu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu" role="navigation">
+          <a href="#despre">Despre</a>
+          <a href="#planuri">Planuri</a>
+          <a href="#inscriere">Inscriere</a>
+          <a href="#inscriere" class="nav-cta" style="text-align:center; border-radius:8px;">Trimite o cerere</a>
+        </div>
       </nav>
-      <button class="ghost-button hidden" id="admin-logout" type="button"
-              style="white-space:nowrap;min-width:0;font-size:0.86rem">
-        Iesi din cont
-      </button>
-    </header>
 
-    <main>
-      <!-- ─── PARENT PORTAL ─────────────────────────────── -->
-      <section class="view active" id="portal" aria-labelledby="portal-title">
-        <div class="workspace two-column">
-          <aside class="intro-panel">
-            <div class="formula-strip" aria-hidden="true">
-              <span>x + 7 = 21</span>
-              <span>3a = 48</span>
-              <span>50 lei / ora</span>
+      <!-- ─── HERO ─── -->
+      <section class="hero" id="acasa">
+        <div class="container hero-inner">
+          <div class="hero-text">
+            <p class="hero-eyebrow">Meditatii matematica · Online</p>
+            <h1>
+              Matematica, explicata<br />pana are <em>sens</em>.
+            </h1>
+            <p class="hero-sub">
+              Sesiuni individuale, adaptate ritmului fiecarui elev —
+              de la primele notiuni de algebra pana la pregatirea pentru Evaluarea Nationala.
+            </p>
+            <div class="hero-actions">
+              <a href="#inscriere" class="btn-primary">Trimite o cerere &rarr;</a>
+              <a href="#planuri" class="btn-outline">Vezi planurile</a>
             </div>
-            <h1 id="portal-title">Meditatii online la matematica</h1>
             
-            <div class="info-list">
-              <div>
-                <strong>Online</strong>
-                <span>Ore remote, cu tabla digitala si exercitii lucrate impreuna.</span>
-              </div>
-              <div>
-                <strong>Gimnaziu</strong>
-                <span>Explicatii clare, recapitulare, teme si pregatire constanta.</span>
-              </div>
-            </div>
-            <div class="price-block">
-              <span>Pret fix</span>
-              <strong>50 lei / ora</strong>
-            </div>
-          </aside>
+          </div>
 
-          <section class="panel" aria-labelledby="lookup-title">
+          <div class="hero-img-wrap">
+            <img
+              class="hero-img"
+              src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=700&h=500&fit=crop&auto=format"
+              alt="Elev care lucreaza matematica la birou"
+              loading="eager"
+            />
+            <div class="hero-badge">
+              <p>Parintii spun ca observa</p>
+              <strong>feedback pozitiv <em>chiar din prima sedinta</em></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+<!-- ─── DESPRE ─── -->
+<section class="about" id="despre">
+  <div class="container about-inner">
+
+    <div class="about-photo">
+      <img
+        src="/src/poza_mate.jpeg"
+        alt="Absolvent al Facultății de Matematică și Informatică"
+        loading="lazy"
+      />
+
+      <div class="about-photo-badge">
+        <span>Absolvent</span>
+        <strong>Facultatea de Matematică și Informatică</strong>
+      </div>
+    </div>
+
+    <div class="about-right">
+      <p class="badge">Despre mine</p>
+
+      <h2 class="section-title">
+        Matematica nu trebuie<br />
+        să fie <em>complicată.</em>
+      </h2>
+
+      <div class="about-body">
+        <p>
+          Am început să ofer meditații din dorința de a-i ajuta pe elevi să
+          înțeleagă matematica, nu doar să memoreze formule. Și eu am început de jos
+          la matematică până când am învățat să o înțeleg, iar acum sunt absolvent a Facultății de Matematică și Informatică. De aceea, încerc să
+          explic fiecare concept cât mai simplu, folosind exemple și analogii
+          din viața reală, până când are sens.
+        </p>
+
+        <p>
+          În timpul ședințelor, elevul este cel care exersează și găsește
+          soluția, iar eu intervin atunci când apare dificultăți sau întrebări. Nu trecem
+          mai departe până când sunt sigur că a înțeles. Fiind apropiat ca
+          vârstă de elevii cu care lucrez, pot comunica mai natural cu ei și
+          pot adapta explicațiile la modul lor de a gândi.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+      <!-- ─── PLANURI ─── -->
+      <section class="plans" id="planuri">
+        <div class="container">
+          <div class="plans-header">
+            <h2 class="section-title">Alege planul potrivit</h2>
+            <p class="section-intro">Alege varianta potrivită pentru ritmul și obiectivele elevului.</p>
+          </div>
+
+          <div class="container"> 
+            <div class="referral referral-highlight">
+              <div class="referral-icon" aria-hidden="true">✓</div>
+
+              <div class="referral-content">
+                <p class="referral-label">Program de recomandări</p>
+
+                <h3>
+                  Recomanzi la un prieten?
+                  <span>Primiți 50% reducere!</span>
+                </h3>
+
+                <p class="referral-description">
+                  Dacă un părinte ajunge la mine prin recomandarea ta,
+                  primiți  <strong>50% reducere la prima lună</strong>,
+                  indiferent de planul ales.
+                </p>
+            </div>
+              <a href="#inscriere" class="referral-cta">
+                Recomandă acum →
+              </a>
+              </div>
+          </div>
+<div class="cards">
+
+  <!-- PLAN 1 -->
+  <div class="card">
+    <div class="card-name">1 Ora / Saptamana</div>
+    <div class="card-tagline">Recapitulare punctuala, fara angajament</div>
+    <div class="card-price">65 <sub>RON/ora</sub></div>
+    <p class="card-price-note">Facturat per sedinta · Fara abonament minim</p>
+
+    <ul class="card-features">
+      <li>1 ora / saptamana, 1-la-1</li>
+      <li>Plata lunara</li>
+    </ul>
+
+    <a href="#inscriere" class="card-cta">Inscrie-te</a>
+  </div>
+
+
+  <!-- PLAN 2 -->
+  <div class="card featured">
+    <div class="card-ribbon">Recomandat</div>
+    <div class="card-name">1 Ședință(2 Ore) / Saptamana</div>
+    <div class="card-tagline">Algebra + Geometrie, in aceeasi sedinta</div>
+    
+    <div class="card-price">120 <sub>RON/sedinta</sub></div>
+    <p class="card-price-note">480 RON/luna la plata standard</p>
+
+    <ul class="card-features">
+      <li>2 ore / saptamana, 1-la-1</li>
+      <li>O singura programare, doua materii</li>
+      <li>Beneficii la plata anticipata (vezi mai jos)</li>
+    </ul>
+
+    <div class="perks-wrap">
+      <p class="perks-label">Beneficii la plata anticipata</p>
+
+      <table class="perks-table" aria-label="Beneficii per nivel de angajament">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Clasa a VIII-a</th>
+            <th>Cls. V–VII</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>2 luni</td>
+            <td>Evaluare de progres pentru examen</td>
+            <td>1 ora gratuita / luna</td>
+          </tr>
+
+          <tr>
+            <td>3+ luni</td>
+            <td>Evaluare + 2 ore gratuite / luna</td>
+            <td>2 ore gratuite/luna + suport WhatsApp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <a href="#inscriere" class="card-cta" style="margin-top:1.5rem;">Inscrie-te</a>
+  </div>
+
+
+  <!-- PLAN NOU -->
+  <div class="card">
+    <div class="card-name">1 Ședință(2 Ore) + 1 Oră / Saptamana</div>
+    <div class="card-tagline">Mai mult timp pentru aprofundare si exercitii</div>
+    
+    <div class="card-price">
+      180 <sub>RON/saptamana</sub>
+    </div>
+
+    <p class="card-price-note">720 RON/luna la plata standard</p>
+
+    <ul class="card-features">
+      <li>3 ore / saptamana, 1-la-1</li>
+      <li>1 ședință principală + 1 ora suplimentara</li>
+      <li>Beneficii la plata anticipata (vezi mai jos)</li>
+    </ul>
+<div class="perks-wrap">
+      <p class="perks-label">Beneficii la plata anticipata</p>
+
+      <table class="perks-table" aria-label="Beneficii per nivel de angajament">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Clasa a VIII-a</th>
+            <th>Cls. V–VII</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>2 luni</td>
+            <td>Evaluare de progres pentru examen</td>
+            <td>1 ora gratuita / luna</td>
+          </tr>
+
+          <tr>
+            <td>3+ luni</td>
+            <td>Evaluare + 2 ore gratuite / luna</td>
+            <td>2 ore gratuite/luna + suport WhatsApp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <a href="#inscriere" class="card-cta">Inscrie-te</a>
+  </div>
+
+
+  <!-- PLAN 4 -->
+  <div class="card">
+    <div class="card-name">2 Ședințe(4 Ore) / Saptamana</div>
+    <div class="card-tagline">Pregatire constanta si progres accelerat</div>
+
+    
+    <div class="card-price">
+      240 <sub>RON/saptamana</sub>
+    </div>
+
+    <p class="card-price-note">960 RON/luna la plata standard</p>
+
+    <ul class="card-features">
+      <li>4 ore / saptamana, 1-la-1</li>
+      <li>2 sedinte separate pe saptamana</li>
+      <li>Algebra + Geometrie</li>
+      <li>Beneficii la plata anticipata (vezi mai jos)</li>
+    </ul>
+
+    <div class="perks-wrap">
+      <p class="perks-label">Beneficii la plata anticipata</p>
+
+      <table class="perks-table" aria-label="Beneficii per nivel de angajament">
+        <thead>
+          <tr>
+            <th>Prepaid</th>
+            <th>Clasa a VIII-a</th>
+            <th>Cls. V–VII</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>2 luni</td>
+            <td>Evaluare de progres pentru examen</td>
+            <td>1 ora gratuita / luna</td>
+          </tr>
+
+          <tr>
+            <td>3+ luni</td>
+            <td>Evaluare + 2 ore gratuite / luna</td>
+            <td>1 ora gratuita / 2 saptamani + suport WhatsApp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <a href="#inscriere" class="card-cta" style="margin-top:1.5rem;">Inscrie-te</a>
+  </div>
+
+</div>
+
+
+
+          
+      </section>
+
+      <!-- ─── INSCRIERE ─── -->
+      <section class="signup" id="inscriere">
+        <div class="container signup-inner">
+          <div class="signup-left">
+            <p class="badge">Contacteaza-ma</p>
+            <h2 class="section-title">Hai sa discutam despre elev.</h2>
+            <p class="section-intro">
+              Completeaza formularul — te contactez cat mai curand pentru a stabili primii pasi.
+            </p>
+            <div class="signup-contact">
+              <div class="contact-item">
+                <span class="icon" aria-hidden="true">&#9742;</span>
+                <div>
+                  <p>Telefon</p>
+                  <strong><a href="tel:+40775147463">+40 775 147 463</a></strong>
+                </div>
+              </div>
+              <div class="contact-item">
+                <span class="icon" aria-hidden="true">&#9679;</span>
+                <div>
+                  <p>Locatie</p>
+                  <strong>Online</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signup-right">
+            <form id="signup-form" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <label for="signup-parent-name">Numele tau (parinte) *</label>
+                  <input id="signup-parent-name" name="parent_name" type="text" placeholder="Ex: Maria Ionescu" required />
+                </div>
+                <div class="field">
+                  <label for="signup-student-name">Numele elevului *</label>
+                  <input id="signup-student-name" name="student_name" type="text" placeholder="Ex: Andrei" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label for="signup-grade">Clasa</label>
+                  <select id="signup-grade" name="grade">
+                    <option value="" selected>Alege clasa…</option>
+                    <option value="a V-a">Clasa a V-a</option>
+                    <option value="a VI-a">Clasa a VI-a</option>
+                    <option value="a VII-a">Clasa a VII-a</option>
+                    <option value="a VIII-a">Clasa a VIII-a (Evaluare Nationala)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="signup-plan">Plan dorit *</label>
+                  <select id="signup-plan" name="plan" required>
+                    <option value="" disabled selected>Alege planul…</option>
+                    <option value="1h">1 Ora / Saptamana — 65 RON/ora</option>
+                    <option value="2h">1 Sedinta (2 Ore) / Saptamana — 120 RON/sedinta</option>
+                    <option value="3h">1 Sedinta (2 Ore) + 1 Ora / Saptamana — 180 RON/saptamana</option>
+                    <option value="4h">2 Sedinte (4 Ore) / Saptamana — 240 RON/saptamana</option>
+                    <option value="unsure">Nu stiu inca, vreau sa discutam</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="signup-phone">Telefon *</label>
+                <input id="signup-phone" name="phone" type="tel" inputmode="tel" placeholder="07XX XXX XXX" required />
+              </div>
+
+              <div class="field">
+                <label for="signup-message">Mesaj optional</label>
+                <textarea id="signup-message" name="message" placeholder="Spune-mi cateva cuvinte despre situatia actuala, ce capitol ii da bataie de cap sau orice altceva consideri relevant…"></textarea>
+              </div>
+
+              <button type="submit" class="form-submit">Trimite cererea &rarr;</button>
+              <p class="form-note">Te contactez cat mai curand pentru a stabili primii pasi.</p>
+            </form>
+
+            <div class="form-success" id="form-success" role="alert">
+              ✓ Cererea ta a fost trimisa! Te contactez in curand pe numarul furnizat.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="container footer-inner">
+          <span class="footer-brand">Mate<span>Logic</span></span>
+          <div class="footer-links">
+            <a href="tel:+40775147463">+40 775 147 463</a>
+            <a href="#planuri">Planuri</a>
+            <a href="#inscriere">Inscriere</a>
+            <a href="#" id="admin-link">Admin</a>
+          </div>
+          <p class="footer-copy">© 2026 Portal Meditatii Mate · Toate drepturile rezervate</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════ ADMIN (hidden by default) ═══════════════════════ -->
+    <div id="site-admin" class="hidden">
+      <nav class="admin-topbar">
+        <div class="container nav-inner">
+          <a href="#" class="nav-brand" id="admin-back">&larr; Portal Meditatii <span>Mate</span></a>
+          <button class="ghost-button hidden" id="admin-logout" type="button">Iesi din cont</button>
+        </div>
+      </nav>
+
+      <div class="container admin-workspace">
+        <div class="section-heading">
+          <div>
+            <p class="badge">Panou profesor</p>
+            <h1 class="section-title">Admin meditatii</h1>
+          </div>
+        </div>
+
+        <!-- Login -->
+        <div class="admin-login panel" id="admin-login">
+          <div>
+            <p class="badge">Autentificare securizata</p>
+            <h2 class="section-title" style="font-size:1.3rem">Intra in contul tau</h2>
+          </div>
+          <form id="admin-login-form" class="admin-login-form" novalidate>
+            <label for="admin-email">
+              Email
+              <input id="admin-email" name="email" type="email" inputmode="email" autocomplete="username" placeholder="admin@exemplu.com" required />
+            </label>
+            <label for="admin-password">
+              Parola
+              <input id="admin-password" name="password" type="password" autocomplete="current-password" placeholder="Parola" required />
+            </label>
+            <p class="hint error-text hidden" id="admin-login-error" role="alert"></p>
+            <button type="submit">Intra</button>
+          </form>
+        </div>
+
+        <!-- Admin panel -->
+        <div class="admin-view hidden" id="admin-view">
+          <div class="metrics" id="admin-metrics" aria-label="Statistici"></div>
+
+          <section class="panel" aria-labelledby="settings-title">
             <div class="panel-header">
               <div>
-                <p class="eyebrow">Gaseste contul tau</p>
-                <h2 id="lookup-title">Vezi programul si plateste</h2>
+                <p class="badge">Date plata</p>
+                <h2 id="settings-title" class="section-title" style="font-size:1.2rem">IBAN, Revolut si BT Pay</h2>
               </div>
             </div>
-
-            <form class="lookup-form" id="parent-lookup" novalidate>
-              <label for="phone-input">Numar de telefon</label>
-              <div class="inline-controls">
-                <input
-                  id="phone-input"
-                  name="phone"
-                  type="tel"
-                  inputmode="tel"
-                  placeholder="07xx xxx xxx"
-                  autocomplete="tel"
-                  maxlength="15"
-                  aria-describedby="phone-hint"
-                />
-                <button type="submit">Vezi contul</button>
+            <form class="admin-form" id="settings-form" novalidate>
+              <div class="form-grid">
+                <label>IBAN<input id="settings-iban" autocomplete="off" /></label>
+                <label>Revolut<input id="settings-revolut" autocomplete="off" /></label>
+                <label>BT Pay<input id="settings-btpay" inputmode="tel" autocomplete="off" /></label>
+                <label>Pret pe ora, plan 1h (lei)<input id="settings-price" type="number" min="1" max="9999" inputmode="numeric" /></label>
               </div>
-              
+              <div class="form-actions">
+                <button type="submit">Salveaza datele de plata</button>
+              </div>
             </form>
-
-            <div class="empty-state hidden" id="parent-empty" aria-live="polite"></div>
-            <div class="account-view hidden" id="parent-account" aria-live="polite"></div>
-          
           </section>
-          
-        </div>
-      </section>
 
-      <!-- ─── PAYMENT PAGE ──────────────────────────────── -->
-      <section class="view" id="payment" aria-labelledby="payment-title">
-        <div class="workspace">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Finalizare plata</p>
-              <h1 id="payment-title">Alege metoda de plata</h1>
-            </div>
-            <button class="ghost-button" id="back-to-portal" type="button">Inapoi la cont</button>
-          </div>
-          <div class="payment-page" id="payment-page"></div>
-        </div>
-      </section>
-
-      <!-- ─── PUBLIC CALENDAR ───────────────────────────── -->
-      <section class="view" id="calendar" aria-labelledby="calendar-title">
-        <div class="workspace">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Ore fixe saptamanal</p>
-              <h1 id="calendar-title">Calendar disponibilitate</h1>
-            </div>
-            <div class="legend" aria-label="Legenda">
-              <span><i class="dot free" aria-hidden="true"></i>Liber</span>
-              <span><i class="dot busy" aria-hidden="true"></i>Ocupat</span>
-            </div>
-          </div>
-          <div id="public-calendar" role="region" aria-label="Tabel disponibilitate"></div>
-        </div>
-      </section>
-
-      <!-- ─── ADMIN ──────────────────────────────────────── -->
-      <section class="view" id="admin" aria-labelledby="admin-title">
-        <div class="workspace">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Panou profesor</p>
-              <h1 id="admin-title">Admin meditatii</h1>
-            </div>
-          </div>
-
-          <!-- Login form (shown when not authenticated) -->
-          <div class="admin-login panel" id="admin-login">
-            <div>
-              <p class="eyebrow">Autentificare securizata</p>
-              <h2>Intra in contul tau</h2>
-            </div>
-            <form id="admin-login-form" class="admin-login-form" novalidate>
-              <label for="admin-email">
-                Email
-                <input
-                  id="admin-email"
-                  name="email"
-                  type="email"
-                  inputmode="email"
-                  autocomplete="username"
-                  placeholder="admin@exemplu.com"
-                  required
-                />
-              </label>
-              <label for="admin-password">
-                Parola
-                <input
-                  id="admin-password"
-                  name="password"
-                  type="password"
-                  autocomplete="current-password"
-                  placeholder="Parola"
-                  required
-                />
-              </label>
-              <p class="hint error-text hidden" id="admin-login-error" role="alert"></p>
-              <button type="submit">Intra</button>
-            </form>
-          </div>
-
-          <!-- Admin panel (shown when authenticated) -->
-          <div class="admin-view hidden" id="admin-view">
-            <!-- Metrics -->
-            <div class="metrics" id="admin-metrics" aria-label="Statistici"></div>
-
-            <!-- Payment Settings -->
-            <section class="panel" aria-labelledby="settings-title">
-              <div class="panel-header">
-                <div>
-                  <p class="eyebrow">Date plata</p>
-                  <h2 id="settings-title">IBAN, Revolut si BT Pay</h2>
-                </div>
+          <section class="panel" aria-labelledby="students-title">
+            <div class="panel-header">
+              <div>
+                <p class="badge">Elevi</p>
+                <h2 id="students-title" class="section-title" style="font-size:1.2rem">Elevi si planuri</h2>
               </div>
-              <form class="student-form" id="settings-form" novalidate>
-                <div class="form-grid">
-                  <label>IBAN<input id="settings-iban" autocomplete="off" /></label>
-                  <label>Revolut<input id="settings-revolut" autocomplete="off" /></label>
-                  <label>BT Pay<input id="settings-btpay" inputmode="tel" autocomplete="off" /></label>
-                  <label>Pret pe ora (lei)<input id="settings-price" type="number" min="1" max="9999" inputmode="numeric" /></label>
-                </div>
-                <div class="form-actions">
-                  <button type="submit">Salveaza datele de plata</button>
-                </div>
-              </form>
-            </section>
-
-            <!-- Students -->
-            <div class="admin-grid">
-              <section class="panel" aria-labelledby="students-title">
-                <div class="panel-header">
-                  <div>
-                    <p class="eyebrow">Elevi</p>
-                    <h2 id="students-title">Conturi parinti</h2>
-                  </div>
-                </div>
-                <form class="student-form" id="student-form" novalidate>
-                  <input type="hidden" id="student-id" />
-                  <div class="form-grid">
-                    <label>Nume elev<input id="student-name" required autocomplete="off" /></label>
-                    <label>Parinte<input id="parent-name"  required autocomplete="off" /></label>
-                    <label>Telefon<input id="student-phone" required inputmode="tel" autocomplete="off" /></label>
-                    <label>Observatii<input id="student-notes" autocomplete="off" /></label>
-                  </div>
-                  <div class="form-actions">
-                    <button type="submit">Salveaza elev</button>
-                    <button class="ghost-button" id="clear-student" type="button">Curata formular</button>
-                  </div>
-                </form>
-                <div class="student-list" id="student-list" aria-live="polite"></div>
-              </section>
             </div>
-
-            <!-- Payments -->
-            <section class="panel" id="payments-panel" aria-labelledby="payments-title">
-              <div class="panel-header">
-                <div>
-                  <p class="eyebrow">Istoric</p>
-                  <h2 id="payments-title">Plati inregistrate</h2>
-                </div>
-              </div>
-              <div class="payment-list" id="payments-list" aria-live="polite"></div>
-            </section>
-
-            <!-- Slots calendar -->
-            <section class="panel" aria-labelledby="admin-calendar-title">
-              <div class="panel-header">
-                <div>
-                  <p class="eyebrow">Orar</p>
-                  <h2 id="admin-calendar-title">Marcheaza liber sau ocupat</h2>
-                </div>
-              </div>
-              <form class="slot-form" id="slot-form" novalidate>
-                <label>Zi
-                  <select id="slot-day" required>
-                    <option value="Luni">Luni</option>
-                    <option value="Marti">Marti</option>
-                    <option value="Miercuri">Miercuri</option>
-                    <option value="Joi">Joi</option>
-                    <option value="Vineri">Vineri</option>
-                    <option value="Sambata">Sambata</option>
-                    <option value="Duminica">Duminica</option>
+            <form class="admin-form" id="student-form" novalidate>
+              <input type="hidden" id="student-id" />
+              <div class="form-grid">
+                <label>Nume elev<input id="student-name" required autocomplete="off" /></label>
+                <label>Parinte<input id="parent-name" required autocomplete="off" /></label>
+                <label>Telefon<input id="student-phone" required inputmode="tel" autocomplete="off" /></label>
+                <label>Clasa<input id="student-grade" placeholder="ex: a VIII-a" autocomplete="off" /></label>
+                <label class="checkbox-label">
+                  <input id="student-exam-year" type="checkbox" />
+                  <span>An de examen</span>
+                </label>
+                <label>Plan
+                  <select id="student-plan-type">
+                    <option value="1h">1 ora / saptamana</option>
+                    <option value="2h">1 sedinta (2 ore) / saptamana</option>
+                    <option value="3h">1 sedinta (2 ore) + 1 ora / saptamana</option>
+                    <option value="4h">2 sedinte (4 ore) / saptamana</option>
                   </select>
                 </label>
-                <label>Inceput
-                  <input id="slot-start" type="time" step="300" required />
+                <label>Luni platite in avans<input id="student-prepaid-months" type="number" min="0" max="24" inputmode="numeric" value="0" /></label>
+                <label>Pret lunar (lei)<input id="student-monthly-price" type="number" min="1" max="99999" inputmode="numeric" value="480" /></label>
+                <label>Status
+                  <select id="student-status">
+                    <option value="activ">Activ</option>
+                    <option value="pauza">Pauza</option>
+                    <option value="inactiv">Inactiv</option>
+                  </select>
                 </label>
-                <label>Final
-                  <input id="slot-end" type="time" step="300" required />
-                </label>
-                <button type="submit">Adauga ora</button>
-              </form>
-              <p class="hint slot-hint">Exemplu: 14:30 pana la 15:30 va aparea in calendar ca 14:30-15:30.</p>
-              <div class="admin-calendar" id="admin-calendar" aria-live="polite"></div>
-            </section>
-            <button class="ghost-button" id="save-all-slots" type="button"
-                    style="justify-self:end;width:fit-content">
-              Salveaza toate orele
-            </button>
-          </div>
+                <label>Observatii<input id="student-notes" autocomplete="off" /></label>
+              </div>
+              <div class="form-actions">
+                <button type="submit">Salveaza elev</button>
+                <button class="ghost-button" id="clear-student" type="button">Curata formular</button>
+              </div>
+            </form>
+            <div class="student-list" id="student-list" aria-live="polite"></div>
+          </section>
 
+          <section class="panel" aria-labelledby="leads-title">
+            <div class="panel-header">
+              <div>
+                <p class="badge">Cereri noi</p>
+                <h2 id="leads-title" class="section-title" style="font-size:1.2rem">Inscrieri din formularul public</h2>
+              </div>
+            </div>
+            <div class="lead-list" id="lead-list" aria-live="polite"></div>
+          </section>
+
+          <section class="panel" id="payments-panel" aria-labelledby="payments-title">
+            <div class="panel-header">
+              <div>
+                <p class="badge">Istoric</p>
+                <h2 id="payments-title" class="section-title" style="font-size:1.2rem">Plati inregistrate</h2>
+              </div>
+            </div>
+            <form class="admin-form" id="payment-form" novalidate>
+              <div class="form-grid">
+                <label>Elev
+                  <select id="payment-student-id" required></select>
+                </label>
+                <label>Unitati (ex: luni)<input id="payment-units" type="number" min="1" max="24" inputmode="numeric" value="1" /></label>
+                <label>Suma (lei)<input id="payment-amount" type="number" min="1" max="99999" inputmode="numeric" required /></label>
+                <label>Metoda
+                  <select id="payment-method">
+                    <option value="bank">Transfer</option>
+                    <option value="revolut">Revolut</option>
+                    <option value="btpay">BT Pay</option>
+                  </select>
+                </label>
+                <label>Status
+                  <select id="payment-status">
+                    <option value="confirmed">Confirmata</option>
+                    <option value="pending">In asteptare</option>
+                  </select>
+                </label>
+                <label>Note<input id="payment-notes" autocomplete="off" /></label>
+              </div>
+              <div class="form-actions">
+                <button type="submit">Inregistreaza plata</button>
+              </div>
+            </form>
+            <div class="payment-list" id="payments-list" aria-live="polite"></div>
+          </section>
         </div>
-      
-      </section>
-      
-    </main>
+      </div>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-    <footer class="site-footer" aria-labelledby="footer-contact-title">
-      <div class="footer-content">
-        <div class="footer-copy">
-          <span class="footer-kicker">Contact</span>
-          
-        </div>
-        <a class="footer-phone" href="tel:+40775147463" aria-label="Suna la +40 775 147 463">
-          <span>Telefon</span>
-          <strong>+40 775 147 463</strong>
-        </a>
-      </div>
-    </footer>
 
-    <!-- App entry point (ES module) -->
     <script type="module" src="src/app.js"></script>
   </body>
 </html>
