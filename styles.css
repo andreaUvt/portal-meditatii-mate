@@ -139,7 +139,8 @@ nav {
 }
 .hero-stat strong { font-family: var(--ff-head); font-size: 1.35rem; font-weight: 600; color: var(--navy); display: block; }
 .hero-stat span { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-.hero-img-wrap { position: relative; }
+.hero-img-wrap { position: relative;
+padding-bottom: 20px; }
 .hero-img-wrap::before {
   content: '';
   position: absolute;
