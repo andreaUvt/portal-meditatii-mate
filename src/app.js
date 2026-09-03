@@ -225,6 +225,7 @@ async function handleSignupSubmit(event) {
       phone:       document.querySelector('#signup-phone').value,
       grade:       document.querySelector('#signup-grade').value,
       desiredPlan: document.querySelector('#signup-plan').value,
+      desiredPrepay: document.querySelector('#signup-prepay').value,
       message:     document.querySelector('#signup-message').value,
     });
     els.signupForm.style.display = 'none';
@@ -521,6 +522,7 @@ function renderStudents() {
 }
 
 const LEAD_PLAN_LABEL   = { '1h': '1 ora / saptamana', '2h': '1 sedinta (2 ore) / saptamana', '3h': '1 sedinta (2 ore) + 1 ora / saptamana', '4h': '2 sedinte (4 ore) / saptamana', unsure: 'Nu stie inca' };
+const LEAD_PREPAY_LABEL = { monthly: 'doar luna curenta', '2months': '2 luni in avans', '3months': '3+ luni in avans' };
 const LEAD_STATUS_LABEL = { nou: 'Nou', contactat: 'Contactat', inscris: 'Inscris' };
 
 function renderLeads() {
@@ -538,7 +540,7 @@ function renderLeads() {
         <div class="row-title">
           <strong>${escapeHtml(lead.studentName)}</strong>
           <span>${escapeHtml(lead.parentName)} – ${escapeHtml(lead.phone)}${lead.grade ? ' · clasa ' + escapeHtml(lead.grade) : ''}</span>
-          <span>${LEAD_PLAN_LABEL[lead.desiredPlan] ?? lead.desiredPlan} · ${date}</span>
+          <span>${LEAD_PLAN_LABEL[lead.desiredPlan] ?? lead.desiredPlan} · ${LEAD_PREPAY_LABEL[lead.desiredPrepay] ?? lead.desiredPrepay} · ${date}</span>
           ${lead.message ? `<span class="hint" style="font-size:0.82rem">${escapeHtml(lead.message)}</span>` : ''}
         </div>
         <div class="row-actions" style="align-items:center">

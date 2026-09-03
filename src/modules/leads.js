@@ -6,7 +6,8 @@
 import { supabase } from '../lib/supabase.js';
 import { sanitizeText, sanitizePhone, ValidationError } from './validation.js';
 
-const VALID_PLANS   = ['1h', '2h', '3h', '4h', 'unsure'];
+const VALID_PLANS    = ['1h', '2h', '3h', '4h', 'unsure'];
+const VALID_PREPAYS  = ['monthly', '2months', '3months'];
 const VALID_STATUSES = ['nou', 'contactat', 'inscris'];
 
 function mapRow(row) {
@@ -17,6 +18,7 @@ function mapRow(row) {
     phone:        row.phone,
     grade:        row.grade ?? '',
     desiredPlan:  row.desired_plan ?? 'unsure',
+    desiredPrepay: row.desired_prepay ?? 'monthly',
     message:      row.message ?? '',
     status:       row.status ?? 'nou',
     createdAt:    row.created_at,
@@ -27,23 +29,25 @@ function mapRow(row) {
  * Submit a signup/inquiry (public, anon).
  */
 export async function submitLead(input) {
-  const studentName = sanitizeText(input.studentName, 'Nume elev', 100);
-  const parentName  = sanitizeText(input.parentName,  'Parinte',   100);
-  const phone       = sanitizePhone(input.phone);
-  const grade       = sanitizeText(input.grade ?? '', 'Clasa', 30, false);
-  const message     = sanitizeText(input.message ?? '', 'Mesaj', 500, false);
-  const desiredPlan = VALID_PLANS.includes(input.desiredPlan) ? input.desiredPlan : 'unsure';
+  const studentName  = sanitizeText(input.studentName, 'Nume elev', 100);
+  const parentName   = sanitizeText(input.parentName,  'Parinte',   100);
+  const phone        = sanitizePhone(input.phone);
+  const grade        = sanitizeText(input.grade ?? '', 'Clasa', 30, false);
+  const message       = sanitizeText(input.message ?? '', 'Mesaj', 500, false);
+  const desiredPlan   = VALID_PLANS.includes(input.desiredPlan) ? input.desiredPlan : 'unsure';
+  const desiredPrepay = VALID_PREPAYS.includes(input.desiredPrepay) ? input.desiredPrepay : 'monthly';
 
   if (!phone) throw new ValidationError('Telefonul nu este valid.');
 
   const { error } = await supabase
     .from('leads')
     .insert({
-      student_name: studentName,
-      parent_name:  parentName,
+      student_name:   studentName,
+      parent_name:    parentName,
       phone,
       grade,
-      desired_plan: desiredPlan,
+      desired_plan:   desiredPlan,
+      desired_prepay: desiredPrepay,
       message,
     });
 
@@ -56,7 +60,7 @@ export async function submitLead(input) {
 export async function fetchLeads() {
   const { data, error } = await supabase
     .from('leads')
-    .select('id, student_name, parent_name, phone, grade, desired_plan, message, status, created_at')
+    .select('id, student_name, parent_name, phone, grade, desired_plan, desired_prepay, message, status, created_at')
     .order('created_at', { ascending: false })
     .limit(200);
 
